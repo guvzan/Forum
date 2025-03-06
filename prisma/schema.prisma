@@ -9,34 +9,41 @@ datasource db {
 }
 
 model User {
-  id     Int    @id @default(autoincrement()) // vs UUID ?
-  name   String
-  role   Role   @relation(fields: [roleId], references: [id])
-  roleId Int
-
-  Post Post[] // vs Posts Post[]
-
-  Comment     Comment[]
-  PostLike    PostLike[]
-  CommentLike CommentLike[]
+  id           Int           @id @default(autoincrement()) // vs UUID ?
+  name         String?
+  email        String        @unique
+  role         Role          @relation(fields: [roleId], references: [id])
+  roleId       Int // а як призначити дефолтну роль?
+  password     String
+  avatar       String?
+  isActivated  Boolean       @default(false)
+  lastLogin    DateTime      @default(now())
+  CreatedAt    DateTime      @default(now())
+  posts        Post[] // vs Posts Post[]
+  comments     Comment[]
+  postLikes    PostLike[]
+  commentLikes CommentLike[]
 }
 
 model Role {
-  id   Int    @id @default(autoincrement())
-  name String @unique
-  User User[]
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
 }
 
 model Post {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  author    User     @relation(fields: [authorId], references: [id])
-  authorId  Int
-
-  PostLike PostLike[]
+  id         Int         @id @default(autoincrement())
+  title      String
+  content    String
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  author     User        @relation(fields: [authorId], references: [id])
+  authorId   Int
+  isArchived Boolean     @default(false)
+  images     PostImage[]
+  postLikes  PostLike[]
+  comments   Comment[]
+  categories Category[]
 }
 
 model PostLike {
@@ -48,13 +55,15 @@ model PostLike {
 }
 
 model Comment {
-  id          Int           @id @default(autoincrement())
-  content     String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  author      User          @relation(fields: [authorId], references: [id])
-  authorId    Int
-  CommentLike CommentLike[]
+  id           Int           @id @default(autoincrement())
+  content      String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  author       User          @relation(fields: [authorId], references: [id])
+  authorId     Int
+  post         Post          @relation(fields: [postId], references: [id])
+  postId       Int
+  commentLikes CommentLike[]
 }
 
 model CommentLike {
@@ -63,4 +72,19 @@ model CommentLike {
   commentId Int
   author    User    @relation(fields: [authorId], references: [id])
   authorId  Int
+}
+
+model PostImage {
+  id     Int    @id @default(autoincrement())
+  link   String
+  post   Post   @relation(fields: [postId], references: [id])
+  postId Int
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  posts     Post[]
 }
