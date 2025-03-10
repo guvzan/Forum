@@ -2,8 +2,9 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import bcrypt from 'bcrypt';
 import { GetUsersParamsDto } from './dto/get-users-params.dto';
+import { UserDto } from './dto/user.dto';
+import { plainToInstance } from 'class-transformer';
 
 
 @Injectable()
@@ -38,14 +39,17 @@ export class UserService {
     }
   }
 
-  async getUserById(id: string): Promise<User | null>{
+  async getUserById(id: string): Promise<UserDto>{
     try{
-      return await this.prisma.user.findUnique({
+      const user: User | null = await this.prisma.user.findUnique({
         where: {
           id: Number(id)
         }
-      })
+      });
+      if(!user) throw new HttpException(`User with id ${id} not found`, HttpStatus.NOT_FOUND);
+      return plainToInstance(UserDto, user);
     }catch (e){
+      if(e instanceof HttpException) throw e;
       throw new HttpException(`Failed to find user by id: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -76,4 +80,5 @@ export class UserService {
       throw new HttpException(`Failed to create user: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
 }
