@@ -55,7 +55,7 @@ export class UserService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<User>{
+  async createUser(createUserDto: CreateUserDto): Promise<UserDto>{
     try{
       const {name, email, password, avatar} = createUserDto;
 
@@ -67,7 +67,7 @@ export class UserService {
         throw new HttpException('Role USER does not exist', HttpStatus.INTERNAL_SERVER_ERROR);
       }
 
-      return await this.prisma.user.create({
+      const user: User = await this.prisma.user.create({
         data: {
           email,
           password,
@@ -75,7 +75,8 @@ export class UserService {
           avatar: avatar || null,
           roleId: role.id
         }
-      })
+      });
+      return plainToInstance(UserDto, user);
     }catch (e){
       if(e instanceof HttpException) throw e;
       throw new HttpException(`Failed to create user: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
