@@ -67,7 +67,7 @@ export class UserService {
       if(!user) throw new HttpException(`Profile with id ${id} not found`, HttpStatus.NOT_FOUND);
       return plainToInstance(UserProfileDto, user);
     }catch (e){
-      //todo: rethrow exeption (!user)
+      if(e instanceof HttpException) throw e;
       throw new HttpException(`Failed to get profile by id: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
