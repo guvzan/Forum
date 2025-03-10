@@ -121,4 +121,17 @@ export class UserService {
       throw new HttpException(`Failed to update user: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
+
+  async deleteUser(id:string): Promise<UserDto>{
+    try{
+      const deletedUser: User = await this.prisma.user.delete({
+        where: {
+          id: Number(id)
+        }
+      });
+      return plainToInstance(UserDto, deletedUser);
+    }catch(e){
+      throw new HttpException('Failed to delete user', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
