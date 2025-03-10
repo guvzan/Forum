@@ -50,33 +50,30 @@ export class UserService {
     }
   }
 
-  async createUser(createUserDto: CreateUserDto): Promise<User | any>{
+  async createUser(createUserDto: CreateUserDto): Promise<User>{
     try{
       const {name, email, password, avatar} = createUserDto;
 
-      const role: {name: string, id: number} | null = await this.prisma.role.findFirst({ //use role.dto?
+      const role: {name: string, id: number} | null = await this.prisma.role.findFirst({
         where: { name: 'USER' }
       });
 
       if(!role){
-        throw new Error('Role not found!') // Що тут робити? return { error: 'Role not found' }; ?
+        throw new HttpException('Role USER does not exist', HttpStatus.INTERNAL_SERVER_ERROR);
       }
-
-      const salt: string = bcrypt.genSaltSync()
-      const hashedPassword: string = bcrypt.hashSync(password, salt)
 
       return await this.prisma.user.create({
         data: {
           email,
-          password: hashedPassword,
+          password,
           name: name || email.split('@')[0],
           avatar: avatar || null,
           roleId: role.id
         }
       })
     }catch (e){
-      console.log(e);
-      throw e;
+      if(e instanceof HttpException) throw e;
+      throw new HttpException(`Failed to create user: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 }
