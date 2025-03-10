@@ -11,7 +11,7 @@ import { plainToInstance } from 'class-transformer';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllUsers(query: GetUsersParamsDto): Promise<User[]>{
+  async getAllUsers(query: GetUsersParamsDto): Promise<UserDto[]>{
     try{
       const {username, email} = query;
       const conditions: Prisma.UserWhereInput[] = [];
@@ -31,9 +31,10 @@ export class UserService {
       }
 
       const whereClause = conditions.length > 0? {AND: conditions} : {};
-      return this.prisma.user.findMany({
+      const users: User[] = await this.prisma.user.findMany({
         where: whereClause
       });
+      return plainToInstance(UserDto, users);
     }catch (e){
       throw new HttpException(`Failed to get all users: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }

@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
+import { GetUsersParamsDto } from './dto/get-users-params.dto';
 
 
 @Controller('users')
@@ -10,7 +11,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getAllUsers(@Query() query: {username?: string, email?: string}): Promise<User[]>{
+  async getAllUsers(@Query() query: GetUsersParamsDto): Promise<UserDto[]>{
     return this.userService.getAllUsers(query);
   }
 
