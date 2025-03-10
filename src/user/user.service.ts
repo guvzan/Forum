@@ -1,15 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import bcrypt from 'bcrypt';
+import { GetUsersParamsDto } from './dto/get-users-params.dto';
 
 
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async getAllUsers(query: {username?: string, email?: string}): Promise<User[]>{
+  async getAllUsers(query: GetUsersParamsDto): Promise<User[]>{
     try{
       const {username, email} = query;
       const conditions: Prisma.UserWhereInput[] = [];
@@ -33,8 +34,7 @@ export class UserService {
         where: whereClause
       });
     }catch (e){
-      console.log(e); // Як тут правильно зробити?
-      return []
+      throw new HttpException(`Failed to get all users: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 

@@ -18,7 +18,7 @@ model User {
   avatar       String?
   isActivated  Boolean       @default(false)
   lastLogin    DateTime      @default(now())
-  CreatedAt    DateTime      @default(now())
+  createdAt    DateTime      @default(now())
   posts        Post[]
   comments     Comment[]
   postLikes    PostLike[]
