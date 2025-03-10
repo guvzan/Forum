@@ -46,8 +46,7 @@ export class UserService {
         }
       })
     }catch (e){
-      console.log(e);
-      return null
+      throw new HttpException(`Failed to find user by id: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
