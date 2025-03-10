@@ -6,6 +6,7 @@ import { GetUsersParamsDto } from './dto/get-users-params.dto';
 import { UserDto } from './dto/user.dto';
 import { plainToInstance } from 'class-transformer';
 import { UserProfileDto } from './dto/user-profile.dto';
+import { UpdateUserDto } from './dto/updateUser.dto';
 
 
 @Injectable()
@@ -66,6 +67,7 @@ export class UserService {
       if(!user) throw new HttpException(`Profile with id ${id} not found`, HttpStatus.NOT_FOUND);
       return plainToInstance(UserProfileDto, user);
     }catch (e){
+      //todo: rethrow exeption (!user)
       throw new HttpException(`Failed to get profile by id: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
@@ -73,7 +75,7 @@ export class UserService {
   async createUser(createUserDto: CreateUserDto): Promise<UserDto>{
     try{
       const {name, email, password, avatar} = createUserDto;
-
+      //todo: add check if user already exists
       const role: {name: string, id: number} | null = await this.prisma.role.findFirst({
         where: { name: 'USER' }
       });
@@ -98,4 +100,25 @@ export class UserService {
     }
   }
 
+  async updateUser(id:string, updateUserDto: UpdateUserDto): Promise<UserDto>{
+    try{
+      const {name, avatar} = updateUserDto;
+      const updateData: Partial<User> = {}
+      if(name){
+        updateData.name = name;
+      }
+      if(avatar){
+        updateData.avatar = avatar;
+      }
+      const updatedUser: User = await this.prisma.user.update({
+        where: {
+          id: Number(id)
+        },
+        data: updateData
+      });
+      return plainToInstance(UserDto, updatedUser);
+    }catch (e){
+      throw new HttpException(`Failed to update user: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }
