@@ -14,6 +14,7 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const user_dto_1 = require("./dto/user.dto");
 const class_transformer_1 = require("class-transformer");
+const user_profile_dto_1 = require("./dto/user-profile.dto");
 let UserService = class UserService {
     prisma;
     constructor(prisma) {
@@ -38,9 +39,10 @@ let UserService = class UserService {
                 });
             }
             const whereClause = conditions.length > 0 ? { AND: conditions } : {};
-            return this.prisma.user.findMany({
+            const users = await this.prisma.user.findMany({
                 where: whereClause
             });
+            return (0, class_transformer_1.plainToInstance)(user_dto_1.UserDto, users);
         }
         catch (e) {
             throw new common_1.HttpException(`Failed to get all users: ${e.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
@@ -63,6 +65,21 @@ let UserService = class UserService {
             throw new common_1.HttpException(`Failed to find user by id: ${e.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    async getUserProfile(id) {
+        try {
+            const user = await this.prisma.user.findUnique({
+                where: {
+                    id: Number(id)
+                }
+            });
+            if (!user)
+                throw new common_1.HttpException(`Profile with id ${id} not found`, common_1.HttpStatus.NOT_FOUND);
+            return (0, class_transformer_1.plainToInstance)(user_profile_dto_1.UserProfileDto, user);
+        }
+        catch (e) {
+            throw new common_1.HttpException(`Failed to get profile by id: ${e.message}`, common_1.HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     async createUser(createUserDto) {
         try {
             const { name, email, password, avatar } = createUserDto;
@@ -72,7 +89,7 @@ let UserService = class UserService {
             if (!role) {
                 throw new common_1.HttpException('Role USER does not exist', common_1.HttpStatus.INTERNAL_SERVER_ERROR);
             }
-            return await this.prisma.user.create({
+            const user = await this.prisma.user.create({
                 data: {
                     email,
                     password,
@@ -81,6 +98,7 @@ let UserService = class UserService {
                     roleId: role.id
                 }
             });
+            return (0, class_transformer_1.plainToInstance)(user_dto_1.UserDto, user);
         }
         catch (e) {
             if (e instanceof common_1.HttpException)

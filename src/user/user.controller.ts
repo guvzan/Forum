@@ -4,6 +4,7 @@ import { User } from '@prisma/client';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserDto } from './dto/user.dto';
 import { GetUsersParamsDto } from './dto/get-users-params.dto';
+import { UserProfileDto } from './dto/user-profile.dto';
 
 
 @Controller('users')
@@ -18,6 +19,11 @@ export class UserController {
   @Get(':id')
   async getUserById(@Param('id') id: string): Promise<UserDto>{
     return this.userService.getUserById(id);
+  }
+
+  @Get('profile/:id')
+  async getUserProfile(@Param('id') id: string): Promise<UserProfileDto>{
+    return this.userService.getUserProfile(id);
   }
 
   @Post()

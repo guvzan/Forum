@@ -5,6 +5,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { GetUsersParamsDto } from './dto/get-users-params.dto';
 import { UserDto } from './dto/user.dto';
 import { plainToInstance } from 'class-transformer';
+import { UserProfileDto } from './dto/user-profile.dto';
 
 
 @Injectable()
@@ -52,6 +53,20 @@ export class UserService {
     }catch (e){
       if(e instanceof HttpException) throw e;
       throw new HttpException(`Failed to find user by id: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async getUserProfile(id: string): Promise<UserProfileDto>{
+    try{
+      const user: User | null = await this.prisma.user.findUnique({
+        where: {
+          id: Number(id)
+        }
+      });
+      if(!user) throw new HttpException(`Profile with id ${id} not found`, HttpStatus.NOT_FOUND);
+      return plainToInstance(UserProfileDto, user);
+    }catch (e){
+      throw new HttpException(`Failed to get profile by id: ${e.message}`, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
