@@ -9,17 +9,17 @@ datasource db {
 }
 
 model User {
-  id           Int           @id @default(autoincrement()) // vs UUID ?
+  id           Int           @id @default(autoincrement())
   name         String?
   email        String        @unique
   role         Role          @relation(fields: [roleId], references: [id])
-  roleId       Int // а як призначити дефолтну роль?
+  roleId       Int
   password     String
   avatar       String?
   isActivated  Boolean       @default(false)
   lastLogin    DateTime      @default(now())
-  CreatedAt    DateTime      @default(now())
-  posts        Post[] // vs Posts Post[]
+  createdAt    DateTime      @default(now())
+  posts        Post[]
   comments     Comment[]
   postLikes    PostLike[]
   commentLikes CommentLike[]
@@ -32,18 +32,35 @@ model Role {
 }
 
 model Post {
-  id         Int         @id @default(autoincrement())
-  title      String
-  content    String
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
-  author     User        @relation(fields: [authorId], references: [id])
-  authorId   Int
-  isArchived Boolean     @default(false)
-  images     PostImage[]
-  postLikes  PostLike[]
-  comments   Comment[]
-  categories Category[]
+  id             Int            @id @default(autoincrement())
+  title          String
+  content        String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  author         User           @relation(fields: [authorId], references: [id])
+  authorId       Int
+  isArchived     Boolean        @default(false)
+  images         PostImage[]
+  postLikes      PostLike[]
+  comments       Comment[]
+  postCategories PostCategory[]
+}
+
+model Category {
+  id             Int            @id @default(autoincrement())
+  name           String
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  postCategories PostCategory[]
+}
+
+model PostCategory {
+  post       Post     @relation(fields: [postId], references: [id])
+  postId     Int
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+
+  @@id([postId, categoryId])
 }
 
 model PostLike {
@@ -79,12 +96,4 @@ model PostImage {
   link   String
   post   Post   @relation(fields: [postId], references: [id])
   postId Int
-}
-
-model Category {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  posts     Post[]
 }
